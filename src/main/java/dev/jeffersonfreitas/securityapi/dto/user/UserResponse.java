@@ -1,13 +1,10 @@
 package dev.jeffersonfreitas.securityapi.dto.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import dev.jeffersonfreitas.securityapi.dto.group.GroupResponse;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserResponse {
+import java.util.List;
 
-    private String username;
+
+public record UserResponse(String username, List<GroupResponse> groups) {
+
 }

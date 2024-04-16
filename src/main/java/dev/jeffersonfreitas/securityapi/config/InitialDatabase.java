@@ -21,12 +21,11 @@ public class InitialDatabase implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        Permission productCreate = new Permission("PRODUCT_CREATE");
-        Permission productList = new Permission("PRODUCT_LIST");
-        Permission productDelete = new Permission("PRODUCT_DELETE");
-        permissionRepository.saveAll(List.of(productCreate, productList, productDelete));
+        Permission productList = new Permission("CLIENT_LIST");
+        Permission productDelete = new Permission("CLIENT_DELETE");
+        permissionRepository.saveAll(List.of(productList, productDelete));
 
-        Group admin = new Group("ADMIN", List.of(productCreate, productList, productDelete));
+        Group admin = new Group("ADMIN", List.of(productList, productDelete));
         Group user = new Group("USER", List.of(productList));
         groupRepository.saveAll(List.of(admin, user));
     }

@@ -24,7 +24,7 @@ public class User {
 
     private String password;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_groups",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "group_id")
@@ -32,8 +32,8 @@ public class User {
     private List<Group> groups;
 
 
-    public static User create(UserCreateRequest request, List<Group> groups) {
-        return new User(request.getUsername(), request.getPassword(), groups);
+    public static User create(String username, String password, List<Group> groups) {
+        return new User(username, password, groups);
     }
 
     private User(String username, String password, List<Group> groups) {

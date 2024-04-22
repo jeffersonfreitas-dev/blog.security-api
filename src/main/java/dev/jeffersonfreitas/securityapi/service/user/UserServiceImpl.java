@@ -32,13 +32,13 @@ public class UserServiceImpl implements UserService{
         var passwordEncoded = passwordEncoder.encode(request.getPassword());
         User entity = User.create(request.getUsername(), passwordEncoded, groups);
         repository.save(entity);
-        return new UserResponse(entity.getUsername(), GroupResponse.fromEntity(entity.getGroups()));
+        return new UserResponse(entity.getId(), entity.getUsername(), GroupResponse.fromEntity(entity.getGroups()));
     }
 
     @Override
     public List<UserResponse> fetchAll() {
         return repository.findAll().stream()
-                .map(u -> new UserResponse(u.getUsername(), GroupResponse.fromEntity(u.getGroups()))).toList();
+                .map(u -> new UserResponse(u.getId(), u.getUsername(), GroupResponse.fromEntity(u.getGroups()))).toList();
     }
 
     @Override

@@ -20,53 +20,42 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class CredentialsAuthenticationFilter extends OncePerRequestFilter {
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String BASIC = "Basic ";
-    private final PasswordEncoder passwordEncoder;
+    private static final String BEARER = "Bearer ";
     private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        var credentials = getBasicAuthentication(request);
+        var token = getBearerAuthentication(request);
 
-        if(credentials.isPresent()){
-            String[] listCredencials = decodeBase64(credentials.get()).split(":");
+        if(token.isPresent()){
 
-            var username = listCredencials[0];
-            var password = listCredencials[1];
-
+            String username = SecurityUtils.verifyToken(token.get());
             Optional<User> user = userRepository.findByUsernameIgnoreCase(username);
-            var passIsValid = SecurityUtils.isValidPassword(password, user.get().getPassword());
 
-            if(user.isEmpty() || !passIsValid){
+            if(user.isEmpty()){
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Username does not exists or password is invalid");
                 return;
             }
-            setAuthentication(user.get());
+
+            UserPrincipal principal = UserPrincipal.create(user.get());
+            setAuthentication(principal);
         }
         filterChain.doFilter(request, response);
     }
 
-    private void setAuthentication(User user) {
-        Authentication authentication = createAuthentication(user);
+
+    private void setAuthentication(UserPrincipal userPrincipal) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private Authentication createAuthentication(User user) {
-        UserPrincipal userPrincipal = UserPrincipal.create(user);
-        return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
-    }
 
-    private String decodeBase64(String base64){
-        byte[] decodeBytes = Base64.getDecoder().decode(base64);
-        return new String(decodeBytes);
-    }
-
-    private Optional<String> getBasicAuthentication(HttpServletRequest request) {
+    private Optional<String> getBearerAuthentication(HttpServletRequest request) {
         var header = request.getHeader("Authorization");
-        return header != null && header.startsWith(BASIC) ?
-                Optional.of(header.replace(BASIC, "")) : Optional.empty();
+        return header != null && header.startsWith(BEARER) ?
+                Optional.of(header.replace(BEARER, "")) : Optional.empty();
     }
 }

@@ -59,4 +59,10 @@ public class ErrorHandlerConfig {
         var error = "O parâmetro " + ex.getParameterName() + " deve ser informado!";
         return CustomErrorResponse.create(HttpStatus.BAD_REQUEST.value(), error);
     }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(NotAuthorizedException.class)
+    public CustomErrorResponse handleNotAuthorizedException(NotAuthorizedException ex) {
+        return CustomErrorResponse.create(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+    }
 }
